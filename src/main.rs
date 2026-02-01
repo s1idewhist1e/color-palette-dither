@@ -10,10 +10,26 @@ use image::{DynamicImage, Rgb};
 
 mod color_spaces;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // TODO: Determine median distance between palette colors
+const HELPTEXT: &'static str = "
+A dithering tool that does ordered dithering with an arbitrary color palette
 
+Usage:
+color-palette-dither <input> <output> <palette>
+where:
+    input is the path to the input file to read from
+    output is the path to the file to output to
+    palette is the path to read the palette image from
+";
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = env::args().collect_vec();
+    if args.len() != 4
+        || args.contains(&String::from("--help"))
+        || args.contains(&String::from("-h"))
+    {
+        println!("{}", HELPTEXT);
+        std::process::exit(1);
+    }
     let source_path = Path::new(&args[1]);
     let dest_path = Path::new(&args[2]);
     let palette_path = Path::new(&args[3]);
