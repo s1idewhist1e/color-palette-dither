@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest_path = Path::new(&args[2]);
     let palette_path = Path::new(&args[3]);
 
-    let mut palette = get_palette(palette_path)?;
+    let palette = get_palette(palette_path)?;
 
     let img = image::ImageReader::open(source_path)?.decode()?;
 
@@ -80,6 +80,7 @@ fn get_palette(palette: &std::path::Path) -> std::result::Result<Vec<LAB>, image
     Ok(img
         .into_rgb8()
         .pixels()
+        .unique()
         .map(|pixel| SRGB::from(pixel).lab())
         // .map(|pixel| Color::from(pixel).into_cielab())
         .collect())
@@ -97,8 +98,8 @@ fn ordered_dither(
         .unwrap()
         .enumerate_pixels_mut()
         .collect_vec()
-        // .par_iter_mut()
-        .iter_mut()
+        .par_iter_mut()
+        // .iter_mut()
         .for_each(move |(x, y, assign_color)| {
             // println!("Running pixel {},{}", x, y);
             let color = SRGB::from(assign_color as &image::Rgb<u8>).lab();
@@ -148,8 +149,9 @@ fn evaluate_distance(color: LAB, color1: LAB, color2: LAB) -> (f32, f32) {
         color2.a - color1.a,
         color2.b - color1.b,
     );
+
     let b = (color.l - color1.l, color.a - color1.a, color.b - color1.b);
-    
+
     // let color = color.srgb();
     // let color1 = color1.srgb();
     // let color2 = color2.srgb();
@@ -163,20 +165,23 @@ fn evaluate_distance(color: LAB, color1: LAB, color2: LAB) -> (f32, f32) {
     let dot = a.0 * b.0 + a.1 * b.1 + a.2 * b.2;
 
     let mag_a_sq = a.0 * a.0 + a.1 * a.1 + a.2 * a.2;
-    let mag_b_sq = b.0 * b.0 + b.1 * b.1 + b.2 * b.2;
+
+    // Short circuit on the edge case that `color1` and `color2` are equals
+    const EPSILON: f32 = 1e-6;
+    if mag_a_sq < EPSILON {
+        return (0., (b.0 * b.0 + b.1 * b.1 + b.2 * b.2));
+    }
 
     // Find the component of the line segment from color1->color2 that is closest to color
-    let ratio = (dot / mag_a_sq).clamp(0.,1.);
+    let ratio = (dot / mag_a_sq).clamp(0., 1.);
 
     // scale the vector color1->color2 to ratio
-    let closest_point = (a.0 * ratio, a.1 * ratio, a.2 * ratio );
-
+    let closest_point = (a.0 * ratio, a.1 * ratio, a.2 * ratio);
 
     // Find the distance between these two
     let err = euclidean_distance_sq(closest_point, b);
 
-    let err = err + 0.05*euclidean_distance_color_sq(color1, color2);
-
+    let err = err + 0.05 * euclidean_distance_color_sq(color1, color2);
 
     // dbg!(err, ratio);
     assert!(err >= 0.);
@@ -207,11 +212,11 @@ fn euclidean_distance_color_sq(a: LAB, b: LAB) -> f32 {
 fn euclidean_distance_color(a: LAB, b: LAB) -> f32 {
     ((a.l - b.l) * (a.l - b.l) + (a.a - b.a) * (a.a - b.a) + (a.b - b.b) * (a.b - b.b)).sqrt()
 }
-fn euclidean_distance_sq(a: (f32,f32,f32), b: (f32,f32,f32)) -> f32 {
+fn euclidean_distance_sq(a: (f32, f32, f32), b: (f32, f32, f32)) -> f32 {
     ((a.0 - b.0) * (a.0 - b.0) + (a.1 - b.1) * (a.1 - b.1) + (a.2 - b.2) * (a.2 - b.2))
 }
 
-fn euclidean_distance(a: (f32,f32,f32), b: (f32,f32,f32)) -> f32 {
+fn euclidean_distance(a: (f32, f32, f32), b: (f32, f32, f32)) -> f32 {
     ((a.0 - b.0) * (a.0 - b.0) + (a.1 - b.1) * (a.1 - b.1) + (a.2 - b.2) * (a.2 - b.2)).sqrt()
 }
 
