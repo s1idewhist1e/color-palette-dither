@@ -1,4 +1,9 @@
-use std::{env, f32::consts::PI, path::Path};
+use clap::Parser;
+use std::{
+    env,
+    f32::consts::PI,
+    path::{Path, PathBuf},
+};
 
 use color_spaces::*;
 
@@ -8,6 +13,7 @@ use itertools::Itertools;
 
 use image::{DynamicImage, Rgb};
 
+mod argument_parsing;
 mod color_spaces;
 
 const HELPTEXT: &'static str = "
@@ -22,17 +28,13 @@ where:
 ";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = env::args().collect_vec();
-    if args.len() != 4
-        || args.contains(&String::from("--help"))
-        || args.contains(&String::from("-h"))
-    {
-        println!("{}", HELPTEXT);
-        std::process::exit(1);
-    }
-    let source_path = Path::new(&args[1]);
-    let dest_path = Path::new(&args[2]);
-    let palette_path = Path::new(&args[3]);
+    let args = argument_parsing::Args::parse();
+
+    let output_file = args.output_file.unwrap_or("out.png".into());
+
+    let source_path = Path::new(&args.input_file);
+    let dest_path = Path::new(&output_file);
+    let palette_path = Path::new(&args.palette_file);
 
     let palette = get_palette(palette_path)?;
 

@@ -5,7 +5,7 @@ Yes I probably spelled palette wrong
 Generates a dithered image from a color palette provided as a png.
 
 Command line:
-`color-palette-dither <input> <output> <color palette>`
+`color-palette-dither --input-file <input file> --palette-file <palette file> --output-file [out.png]`
 
 # Examples
 
