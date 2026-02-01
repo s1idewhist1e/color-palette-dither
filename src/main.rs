@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest_path = Path::new(&args[2]);
     let palette_path = Path::new(&args[3]);
 
-    let palette = get_palette(palette_path)?;
+    let mut palette = get_palette(palette_path)?;
 
     let img = image::ImageReader::open(source_path)?.decode()?;
 
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: (maybe) implement irregular pallets
     //
     // let mut pallet_l_sorted = pallet.iter().map(|v| v.l).collect_vec();
-    // pallet_l_sorted.sort_by(f32::total_cmp);
+    // palette.sort_by(|a,b| a.l.total_cmp(&b.l));
     // let mut pallet_l_difference = pallet_l_sorted
     //     .iter()
     //     .tuple_windows::<(&f32, &f32)>()
@@ -122,9 +122,16 @@ fn ordered_dither(mut img: DynamicImage, palette: &[impl Color + Copy + Sync + S
                 }
             }
 
-            if factor < plan_ratio {
+            // **assign_color = lerp_color(plan_ratio, plan_color1, plan_color2).srgb().into()
+            //
+            // **assign_color = Rgb([(factor * 256.) as u8; 3]);
+            // **assign_color = plan_color1.srgb().into();
+
+            if factor > plan_ratio {
+                // **assign_color = Rgb([0,0,255])
                 **assign_color = plan_color1.srgb().into();
             } else {
+                // **assign_color = Rgb([0,255,0])
                 **assign_color = plan_color2.srgb().into();
             }
         });
@@ -143,7 +150,7 @@ fn color_error(
     let mixed = mixed.lab();
     let color1 = color1.lab();
     let color2 = color2.lab();
-    euclidean_distance_squared(color, mixed)  + 0.33 * euclidean_distance_squared(color1, color2)
+    euclidean_distance_squared(color, mixed)  + 0.1 * euclidean_distance_squared(color1, color2)
 }
 
 fn euclidean_distance_squared(a: LAB, b: LAB) -> f32 {
@@ -159,6 +166,9 @@ fn lerp_color(ratio: f32, color1: impl Color, color2: impl Color) -> LAB {
         l: (color1.l * (1. - ratio) + ratio * color2.l),
         a: (color1.a * (1. - ratio) + ratio * color2.a),
         b: (color1.b * (1. - ratio) + ratio * color2.b),
+        // l: (color1.l * (1. - ratio) + ratio * color2.l),
+        // a: (color1.a * (1. - ratio) + ratio * color2.a),
+        // b: (color1.b * (1. - ratio) + ratio * color2.b),
     }
 }
 
