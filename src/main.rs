@@ -40,6 +40,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let img = image::ImageReader::open(source_path)?.decode()?;
 
+    // resize image
+    let in_width = 1920;
+    let in_height = 1080;
+
+    let mut width = in_width;
+    let mut height = in_height;
+
+    let input_aspect = img.width() as f32 / img.height() as f32;
+    let output_aspect = width as f32 / height as f32;
+
+    if input_aspect < output_aspect {
+        // limiting factor is width
+        height = (width as f32 / input_aspect) as u32;
+    } else {
+        width = (height as f32 * input_aspect) as u32;
+    }
+    let img = img.resize(width, height, image::imageops::FilterType::CatmullRom);
+
+    let img = img.crop_imm(
+        (width - in_width) / 2,
+        (height - in_height) / 2,
+        in_width,
+        in_height,
+    );
+
     let output = ordered_dither(img, &palette);
 
     output.save(Path::new(dest_path))?;
