@@ -11,10 +11,12 @@ It will resize it to 1920x1080, customization will be implented soon
 
 # Examples
 
+All of these are my own photos and dithered using the [dracula](https://draculatheme.com/) color palette.
+
+Best viewing is at full size.
+
 ![](docs/examples/gradient.png)
-![](docs/examples/20220829-DSC_0690.jpg)
-![](docs/examples/20220829-DSC_0690-dither.png)
-![](docs/examples/20220829-DSC_0702.jpg)
-![](docs/examples/20220829-DSC_0702-dither.png)
 ![](docs/examples/DSC_1141-2-HDR.jpg)
-![](docs/examples/DSC_1141-2-HDR-dither.png)
+![](docs/examples/DSC_0080.jpg)
+![](docs/examples/DSC_1220.jpg)
+![](docs/examples/20220829-DSC_0690.jpg)

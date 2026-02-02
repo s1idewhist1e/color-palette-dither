@@ -56,14 +56,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         width = (height as f32 * input_aspect) as u32;
     }
-    let img = img.resize(width, height, image::imageops::FilterType::CatmullRom);
+    // let img = img.resize(width, height, image::imageops::FilterType::CatmullRom);
 
-    let img = img.crop_imm(
-        (width - in_width) / 2,
-        (height - in_height) / 2,
-        in_width,
-        in_height,
-    );
+    // let img = img.crop_imm(
+    //     (width - in_width) / 2,
+    //     (height - in_height) / 2,
+    //     in_width,
+    //     in_height,
+    // );
 
     let output = ordered_dither(img, &palette);
 
