@@ -11,6 +11,7 @@ It will resize it to 1920x1080, customization will be implented soon
 
 # Examples
 
+![](docs/examples/gradient.png)
 ![](docs/examples/20220829-DSC_0690.jpg)
 ![](docs/examples/20220829-DSC_0690-dither.png)
 ![](docs/examples/20220829-DSC_0702.jpg)
