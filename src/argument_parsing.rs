@@ -10,4 +10,9 @@ pub(crate) struct Args {
 
     #[arg(short,long,default_value=None)]
     pub output_file: Option<String>,
+
+    #[arg(short,long,default_value=None)]
+    pub width: Option<u32>,
+    #[arg(short,long,default_value=None)]
+    pub height: Option<u32>,
 }
